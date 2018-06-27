@@ -38,11 +38,12 @@ class AddLinesSelectProduct(ModelView, AnalyticMixin):
             'readonly': Eval('selected_sales', 0) == 0,
             }, depends=['selected_sales'])
     total_amount = fields.Numeric('Total', digits=(16, Eval('currency_digits', 2)),
-            depends=['currency_digits'])
+            depends=['currency_digits'], required=True)
     currency_digits = fields.Integer('Currency Digits', readonly=True)
-    dues = fields.Integer('dues')
+    dues = fields.Integer('dues', required=True)
     square_meter = fields.Numeric('square_meter', price_digits)
-    first_invoice_date = fields.Date('first_invoice_date')
+    first_invoice_date = fields.Date('first_invoice_date', required=True)
+    line_description = fields.Text('Description')
 
     @classmethod
     def __setup__(cls):
@@ -131,6 +132,8 @@ class AddLines(Wizard):
                 line.unit_price = sale.currency.round(self.select_product.total_amount / dues)
                 line.manual_delivery_date = self.select_product.first_invoice_date + relativedelta(months=due)
                 line.analytic_accounts = self.select_product.analytic_accounts
+                if self.select_product.line_description:
+                    line.description = self.select_product.line_description
                 to_create.append(line)
         if to_create:
             SaleLine.save(to_create)

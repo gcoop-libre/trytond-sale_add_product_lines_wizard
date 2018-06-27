@@ -23,4 +23,7 @@
         <field name="analytic_accounts" colspan="4"/>
         <field name="currency_digits" invisible="1"/>
     </group>
+    <group id="line_description2" string="Description" colspan="4" col="4">
+        <field name="line_description"/>
+    </group>
 </form>
