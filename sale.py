@@ -139,8 +139,8 @@ class AddLines(Wizard):
             SaleLine.save(to_create)
 
         for sale in sales:
-            if sale.total_amount != self.select_product.total_amount:
-                line_diff = self.select_product.total_amount - sale.total_amount
+            if sale.untaxed_amount != self.select_product.total_amount:
+                line_diff = self.select_product.total_amount - sale.untaxed_amount
                 sale.lines[-1].unit_price += line_diff
                 sale.lines[-1].save()
 
