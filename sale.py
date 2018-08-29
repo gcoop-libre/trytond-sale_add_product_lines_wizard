@@ -89,6 +89,7 @@ class AddLines(Wizard):
         return {
             'selected_sales': selected_sales,
             'ignored_sales': len(active_ids) - selected_sales,
+            'line_description': '',
             }
 
     def transition_add_lines(self):
@@ -133,7 +134,11 @@ class AddLines(Wizard):
                 line.manual_delivery_date = self.select_product.first_invoice_date + relativedelta(months=due)
                 line.analytic_accounts = self.select_product.analytic_accounts
                 if self.select_product.line_description:
-                    line.description = self.select_product.line_description
+                    line.description = '%s %s' % (
+                        self.select_product.line_description,
+                        line.manual_delivery_date.strftime('%d/%m/%Y'))
+                else:
+                    line.description += ' %s' % line.manual_delivery_date.strftime('%d/%m/%Y')
                 to_create.append(line)
         if to_create:
             SaleLine.save(to_create)
