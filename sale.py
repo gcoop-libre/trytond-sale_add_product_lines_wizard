@@ -113,7 +113,7 @@ class AddLines(Wizard):
         # concurrent edition exception if an user is editing the same sale
         to_create = []
         for sale in sales:
-            for due in range(dues):
+            for due in range(1, dues):
                 line = SaleLine()
                 line.sale = sale
                 line.type = 'line'
@@ -133,12 +133,15 @@ class AddLines(Wizard):
                 line.unit_price = sale.currency.round(self.select_product.total_amount / dues)
                 line.manual_delivery_date = self.select_product.first_invoice_date + relativedelta(months=due)
                 line.analytic_accounts = self.select_product.analytic_accounts
+                description = line.description
                 if self.select_product.line_description:
-                    line.description = '%s %s' % (
-                        self.select_product.line_description,
-                        line.manual_delivery_date.strftime('%d/%m/%Y'))
-                else:
-                    line.description += ' %s' % line.manual_delivery_date.strftime('%d/%m/%Y')
+                    description = self.select_product.line_description
+                line.description = '%s. Period: %s. Payment %s de %s' % (
+                    description,
+                    line.manual_delivery_date.strftime('%Y-%m'),
+                    str(due),
+                    str(dues),
+                    )
                 to_create.append(line)
         if to_create:
             SaleLine.save(to_create)
