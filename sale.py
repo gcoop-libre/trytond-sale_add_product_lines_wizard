@@ -2,6 +2,7 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
 from dateutil.relativedelta import relativedelta
+from decimal import Decimal
 
 from trytond.model import ModelView, fields
 from trytond.pool import Pool, PoolMeta
@@ -33,17 +34,25 @@ class AddLinesSelectProduct(ModelView, AnalyticMixin):
             },
         help="The sales that won't be changed because they are not in a state "
         "that allows it.")
-    product = fields.Many2One('product.product','Products',
+    product = fields.Many2One('product.product','Product',
         states={
             'readonly': Eval('selected_sales', 0) == 0,
             }, depends=['selected_sales'])
-    total_amount = fields.Numeric('Total', digits=(16, Eval('currency_digits', 2)),
-            depends=['currency_digits'], required=True)
-    currency_digits = fields.Integer('Currency Digits', readonly=True)
-    dues = fields.Integer('dues', required=True)
-    square_meter = fields.Numeric('square_meter', price_digits)
-    first_invoice_date = fields.Date('first_invoice_date', required=True)
-    line_description = fields.Text('Description')
+    total_amount = fields.Numeric('Total', digits=(16,
+            Eval('currency_digits', 2)),  depends=['currency_digits'],
+        required=True)
+    dues = fields.Integer('Dues', required=True)
+    square_meter = fields.Numeric('Square meter', price_digits, required=True)
+    first_invoice_date = fields.Date('First invoice date', required=True)
+    line_description = fields.Text('Line description')
+    unit_price = fields.Numeric('Unit price', digits=price_digits,
+        readonly=True)
+    quantity = fields.Float('Quantity',
+        digits=(16, Eval('unit_digits', 2)),
+        depends=['unit_digits'], readonly=True)
+    unit_digits = fields.Function(fields.Integer('Unit Digits'),
+        'on_change_with_unit_digits')
+    currency_digits = fields.Integer('Currency Digits')
 
     @classmethod
     def __setup__(cls):
@@ -59,6 +68,41 @@ class AddLinesSelectProduct(ModelView, AnalyticMixin):
         if company:
             return Company(company).currency.digits
         return 2
+
+    @staticmethod
+    def default_unit_digits():
+        return 2
+
+    @staticmethod
+    def default_total_amount():
+        return Decimal('0')
+
+    @staticmethod
+    def default_quantity():
+        return 1
+
+    @fields.depends('product')
+    def on_change_with_unit_digits(self, name=None):
+        if self.product:
+            return self.product.sale_uom.digits
+        return 2
+
+    @fields.depends('dues', 'square_meter')
+    def on_change_with_quantity(self, name=None):
+        quantity = 1
+        if self.dues and self.square_meter:
+            quantity = self.square_meter / self.dues
+        return float(quantity)
+
+    @fields.depends('dues', 'square_meter', 'total_amount')
+    def on_change_with_unit_price(self, name=None):
+        unit_price = Decimal('0')
+        quantity = self.on_change_with_quantity()
+        if self.dues and self.total_amount:
+            unit_price = self.total_amount / self.dues
+        if self.dues and self.total_amount and self.square_meter:
+            unit_price = (self.total_amount / self.dues) / Decimal(quantity)
+        return unit_price
 
 
 class AddLines(Wizard):
@@ -113,12 +157,12 @@ class AddLines(Wizard):
         # concurrent edition exception if an user is editing the same sale
         to_create = []
         for sale in sales:
-            for due in range(1, dues):
+            for due in range(1, dues+1):
                 line = SaleLine()
                 line.sale = sale
                 line.type = 'line'
                 line.product = product
-                line.quantity = 1
+                line.quantity = self.select_product.quantity
                 for fname in SaleLine.product.on_change:
                     if (not fname.startswith('_parent_sale')
                             and fname not in ('product', 'quantity')):
@@ -130,7 +174,7 @@ class AddLines(Wizard):
                             setattr(line, fname, None)
 
                 line.on_change_product()
-                line.unit_price = sale.currency.round(self.select_product.total_amount / dues)
+                line.unit_price = sale.currency.round(self.select_product.unit_price)
                 line.manual_delivery_date = self.select_product.first_invoice_date + relativedelta(months=due)
                 line.analytic_accounts = self.select_product.analytic_accounts
                 description = line.description
@@ -149,7 +193,17 @@ class AddLines(Wizard):
         for sale in sales:
             if sale.untaxed_amount != self.select_product.total_amount:
                 line_diff = self.select_product.total_amount - sale.untaxed_amount
-                sale.lines[-1].unit_price += line_diff
-                sale.lines[-1].save()
+                last_line = sale.lines[-1]
+                line = SaleLine()
+                line.sale = sale
+                line.type = 'line'
+                line.quantity = 1
+                line.unit_price = line_diff
+                line.manual_delivery_date = last_line.manual_delivery_date
+                line.taxes = last_line.taxes
+                line.description = last_line.manual_delivery_date
+                line.description = last_line.description
+                line.description += '. Ajuste'
+                line.save()
 
         return 'end'
