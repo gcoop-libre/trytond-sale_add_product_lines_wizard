@@ -159,7 +159,6 @@ class AddLines(Wizard):
         for sale in sales:
             for due in range(1, dues+1):
                 line = SaleLine()
-                line.sale = sale
                 line.type = 'line'
                 line.product = product
                 line.quantity = self.select_product.quantity
@@ -172,7 +171,7 @@ class AddLines(Wizard):
                             setattr(line, fname, default_fname())
                         else:
                             setattr(line, fname, None)
-
+                line.sale = sale
                 line.on_change_product()
                 line.unit_price = sale.currency.round(self.select_product.unit_price)
                 line.manual_delivery_date = self.select_product.first_invoice_date + relativedelta(months=due)
@@ -180,7 +179,7 @@ class AddLines(Wizard):
                 description = line.description
                 if self.select_product.line_description:
                     description = self.select_product.line_description
-                line.description = '%s. Period: %s. Payment %s de %s' % (
+                line.description = '%s. Period: %s. Cuota %s de %s' % (
                     description,
                     line.manual_delivery_date.strftime('%Y-%m'),
                     str(due),
@@ -194,16 +193,8 @@ class AddLines(Wizard):
             if sale.untaxed_amount != self.select_product.total_amount:
                 line_diff = self.select_product.total_amount - sale.untaxed_amount
                 last_line = sale.lines[-1]
-                line = SaleLine()
-                line.sale = sale
-                line.type = 'line'
-                line.quantity = 1
-                line.unit_price = line_diff
-                line.manual_delivery_date = last_line.manual_delivery_date
-                line.taxes = last_line.taxes
-                line.description = last_line.manual_delivery_date
-                line.description = last_line.description
-                line.description += '. Ajuste'
-                line.save()
+                last_line.unit_price = last_line.unit_price + \
+                        sale.currency.round(line_diff / Decimal(last_line.quantity))
+                last_line.save()
 
         return 'end'
