@@ -15,8 +15,7 @@ from trytond.wizard import Wizard, StateView, StateTransition, Button
 __all__ = ['AddLinesSelectProduct', 'AddLines', 'AnalyticAccountEntry']
 
 
-class AnalyticAccountEntry:
-    __metaclass__ = PoolMeta
+class AnalyticAccountEntry(metaclass=PoolMeta):
     __name__ = 'analytic.account.entry'
 
     @classmethod
