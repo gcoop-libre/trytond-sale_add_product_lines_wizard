@@ -34,12 +34,12 @@ class AddLinesSelectProduct(ModelView, AnalyticMixin):
             },
         help="The sales that won't be changed because they are not in a state "
         "that allows it.")
-    product = fields.Many2One('product.product','Product',
+    product = fields.Many2One('product.product', 'Product',
         states={
             'readonly': Eval('selected_sales', 0) == 0,
             }, depends=['selected_sales'])
     total_amount = fields.Numeric('Total', digits=(16,
-            Eval('currency_digits', 2)),  depends=['currency_digits'],
+            Eval('currency_digits', 2)), depends=['currency_digits'],
         required=True)
     dues = fields.Integer('Dues', required=True)
     square_meter = fields.Numeric('Square meter', price_digits, required=True)
@@ -157,7 +157,7 @@ class AddLines(Wizard):
         # concurrent edition exception if an user is editing the same sale
         to_create = []
         for sale in sales:
-            for due in range(1, dues+1):
+            for due in range(1, dues + 1):
                 line = SaleLine()
                 line.type = 'line'
                 line.product = product
@@ -173,8 +173,11 @@ class AddLines(Wizard):
                             setattr(line, fname, None)
                 line.sale = sale
                 line.on_change_product()
-                line.unit_price = sale.currency.round(self.select_product.unit_price)
-                line.manual_delivery_date = self.select_product.first_invoice_date + relativedelta(months=due)
+                line.unit_price = sale.currency.round(
+                    self.select_product.unit_price)
+                line.manual_delivery_date = \
+                    self.select_product.first_invoice_date + relativedelta(
+                        months=due)
                 line.analytic_accounts = self.select_product.analytic_accounts
                 description = line.description
                 if self.select_product.line_description:
@@ -191,10 +194,12 @@ class AddLines(Wizard):
 
         for sale in sales:
             if sale.untaxed_amount != self.select_product.total_amount:
-                line_diff = self.select_product.total_amount - sale.untaxed_amount
+                line_diff = self.select_product.total_amount \
+                    - sale.untaxed_amount
                 last_line = sale.lines[-1]
-                last_line.unit_price = last_line.unit_price + \
-                        sale.currency.round(line_diff / Decimal(last_line.quantity))
+                last_line.unit_price = last_line.unit_price \
+                    + sale.currency.round(
+                        line_diff / Decimal(last_line.quantity))
                 last_line.save()
 
         return 'end'
