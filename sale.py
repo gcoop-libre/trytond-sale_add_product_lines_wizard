@@ -12,8 +12,6 @@ from trytond.modules.product import price_digits
 from trytond.modules.analytic_account import AnalyticMixin
 from trytond.wizard import Wizard, StateView, StateTransition, Button
 
-__all__ = ['AddLinesSelectProduct', 'AddLines', 'AnalyticAccountEntry']
-
 
 class AnalyticAccountEntry(metaclass=PoolMeta):
     __name__ = 'analytic.account.entry'
