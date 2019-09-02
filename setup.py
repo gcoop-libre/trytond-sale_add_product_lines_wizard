@@ -7,7 +7,7 @@ import io
 import os
 import re
 from configparser import ConfigParser
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def read(fname):
@@ -24,7 +24,7 @@ def get_require_version(name):
 
 
 config = ConfigParser()
-config.read_file(open('tryton.cfg'))
+config.read_file(open(os.path.join(os.path.dirname(__file__), 'tryton.cfg')))
 info = dict(config.items('tryton'))
 for key in ('depends', 'extras_depend', 'xml'):
     if key in info:
@@ -40,25 +40,40 @@ download_url = 'https://github.com/gcoop-libre/trytond-sale_add_product_lines_wi
 
 requires = []
 for dep in info.get('depends', []):
-    if not re.match(r'(ir|res)(\W|$)', dep):
+    if dep == 'sale_delivery_date':
+        requires.append(get_require_version('nantic_%s' % dep))
+    elif not re.match(r'(ir|res)(\W|$)', dep):
         requires.append(get_require_version('trytond_%s' % dep))
 requires.append(get_require_version('trytond'))
 
 tests_require = [get_require_version('proteus')]
-dependency_links = []
+dependency_links = [
+    'https://bitbucket.org/gcoop-libre/trytond-sale_delivery_date/get/%s.%s.tar.bz2#egg=nantic_sale_delivery_date-%s.%s' \
+        % (major_version, minor_version, major_version, minor_version),
+    ]
+if minor_version % 2:
+    dependency_links.append('https://trydevpi.tryton.org/')
 
 setup(name=name,
     version=version,
-    description='Tryton module wizard to add several lines to Sale',
+    description='Tryton module for account dunning mipago',
     long_description=read('README'),
-    author='gcoop-libre',
+    author='tryton-ar',
     url='https://github.com/gcoop-libre/trytond-sale_add_product_lines_wizard',
     download_url=download_url,
+    project_urls={
+        "Bug Tracker": 'https://bugs.tryton.org/',
+        "Documentation": 'https://docs.tryton.org/',
+        "Forum": 'https://www.tryton.org/forum',
+        "Source Code": 'https://github.com/tryton-ar/sale_add_product_lines_wizard',
+        },
+    keywords='tryton account dunning mipago',
     package_dir={'trytond.modules.sale_add_product_lines_wizard': '.'},
-    packages=[
-        'trytond.modules.sale_add_product_lines_wizard',
-        'trytond.modules.sale_add_product_lines_wizard.tests',
-        ],
+    packages=(
+        ['trytond.modules.sale_add_product_lines_wizard'] +
+        ['trytond.modules.sale_add_product_lines_wizard.%s' % p
+            for p in find_packages()]
+        ),
     package_data={
         'trytond.modules.sale_add_product_lines_wizard': (info.get('xml', [])
             + ['tryton.cfg', 'view/*.xml', 'locale/*.po']),
@@ -74,7 +89,7 @@ setup(name=name,
         'Natural Language :: English',
         'Natural Language :: Spanish',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
@@ -84,7 +99,7 @@ setup(name=name,
         'Topic :: Office/Business :: Financial :: Accounting',
         ],
     license='GPL-3',
-    python_requires='>=3.4',
+    python_requires='>=3.5',
     install_requires=requires,
     dependency_links=dependency_links,
     zip_safe=False,
