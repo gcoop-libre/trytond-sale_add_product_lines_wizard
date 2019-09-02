@@ -147,6 +147,7 @@ class AddLines(Wizard):
                 ('id', 'in', Transaction().context['active_ids']),
                 ('state', 'in', self._allowed_sale_states),
                 ])
+        sales = [s for s in sales if len(s.lines) == 0]
         if not sales:
             return 'end'
 
@@ -174,9 +175,9 @@ class AddLines(Wizard):
                     self.select_product.unit_price)
                 line.manual_delivery_date = \
                     self.select_product.first_invoice_date + relativedelta(
-                        months=due)
+                        months=due-1)
                 line.analytic_accounts = self.select_product.analytic_accounts
-                description = line.description
+                description = line.product.rec_name
                 if self.select_product.line_description:
                     description = self.select_product.line_description
                 line.description = '%s. Period: %s. Cuota %s de %s' % (
