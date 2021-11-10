@@ -1,5 +1,5 @@
-# The COPYRIGHT file at the top level of this repository contains
-# the full copyright notices and license terms.
+# This file is part of Tryton.  The COPYRIGHT file at the top level of
+# this repository contains the full copyright notices and license terms.
 import unittest
 import doctest
 
@@ -18,7 +18,8 @@ def suite():
     suite = test_suite()
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(
             SaleAddProductLinesTestCase))
-    suite.addTests(doctest.DocFileSuite('scenario_sale_add_product_lines_wizard.rst',
+    suite.addTests(doctest.DocFileSuite(
+            'scenario_sale_add_product_lines_wizard.rst',
             tearDown=doctest_teardown, encoding='utf-8',
             checker=doctest_checker,
             optionflags=doctest.REPORT_ONLY_FIRST_FAILURE))

@@ -5,12 +5,12 @@ from dateutil.relativedelta import relativedelta
 from decimal import Decimal
 
 from trytond.model import ModelView, fields
+from trytond.wizard import Wizard, StateView, StateTransition, Button
 from trytond.pool import Pool, PoolMeta
 from trytond.pyson import Eval
 from trytond.transaction import Transaction
 from trytond.modules.product import price_digits
 from trytond.modules.analytic_account import AnalyticMixin
-from trytond.wizard import Wizard, StateView, StateTransition, Button
 
 
 class AnalyticAccountEntry(metaclass=PoolMeta):
@@ -25,16 +25,16 @@ class AnalyticAccountEntry(metaclass=PoolMeta):
 class AddLinesSelectProduct(ModelView, AnalyticMixin):
     'Add Products to Sale: Select products'
     __name__ = 'sale.add_lines.select_product'
+
     selected_sales = fields.Integer('Selected Sales', readonly=True)
-    ignored_sales = fields.Integer('Ignored Sales', readonly=True, states={
-            'invisible': Eval('ignored_sales', 0) == 0,
-            },
+    ignored_sales = fields.Integer('Ignored Sales', readonly=True,
+        states={'invisible': Eval('ignored_sales', 0) == 0},
         help="The sales that won't be changed because they are not in a state "
         "that allows it.")
     product = fields.Many2One('product.product', 'Product',
-        states={
-            'readonly': Eval('selected_sales', 0) == 0,
-            }, depends=['selected_sales'])
+        domain=[('salable', '=', True)],
+        states={'readonly': Eval('selected_sales', 0) == 0},
+        depends=['selected_sales'])
     total_amount = fields.Numeric('Total', digits=(16,
             Eval('currency_digits', 2)), depends=['currency_digits'],
         required=True)
@@ -50,13 +50,6 @@ class AddLinesSelectProduct(ModelView, AnalyticMixin):
     unit_digits = fields.Function(fields.Integer('Unit Digits'),
         'on_change_with_unit_digits')
     currency_digits = fields.Integer('Currency Digits')
-
-    @classmethod
-    def __setup__(cls):
-        pool = Pool()
-        SaleLine = pool.get('sale.line')
-        super(AddLinesSelectProduct, cls).__setup__()
-        cls.product.domain = SaleLine.product.domain
 
     @staticmethod
     def default_currency_digits():
@@ -105,6 +98,7 @@ class AddLinesSelectProduct(ModelView, AnalyticMixin):
 class AddLines(Wizard):
     'Add multiple lines based on one Product to Sale'
     __name__ = 'sale.add_lines'
+
     start_state = 'select_product'
     select_product = StateView('sale.add_lines.select_product',
         'sale_add_product_lines_wizard.add_product_lines_view_form', [
@@ -175,7 +169,7 @@ class AddLines(Wizard):
                     self.select_product.unit_price)
                 line.manual_delivery_date = \
                     self.select_product.first_invoice_date + relativedelta(
-                        months=due-1)
+                        months=due - 1)
                 line.analytic_accounts = self.select_product.analytic_accounts
                 description = line.product.rec_name
                 if self.select_product.line_description:
