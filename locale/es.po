@@ -1,3 +1,93 @@
 #
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "field:sale.add_lines.select_product,analytic_accounts:"
+msgid "Analytic Accounts"
+msgstr "Cuentas analíticas"
+
+msgctxt "field:sale.add_lines.select_product,analytic_accounts_size:"
+msgid "Analytic Accounts Size"
+msgstr "Tamaño de cuentas analíticas"
+
+msgctxt "field:sale.add_lines.select_product,currency_digits:"
+msgid "Currency Digits"
+msgstr "Decimales de la moneda"
+
+msgctxt "field:sale.add_lines.select_product,dues:"
+msgid "Dues"
+msgstr "Cuotas"
+
+msgctxt "field:sale.add_lines.select_product,first_invoice_date:"
+msgid "First invoice date"
+msgstr "Fecha primera factura"
+
+msgctxt "field:sale.add_lines.select_product,ignored_sales:"
+msgid "Ignored Sales"
+msgstr "Ventas ignoradas"
+
+msgctxt "field:sale.add_lines.select_product,line_description:"
+msgid "Line description"
+msgstr "Descripción línea"
+
+msgctxt "field:sale.add_lines.select_product,product:"
+msgid "Product"
+msgstr "Producto"
+
+msgctxt "field:sale.add_lines.select_product,quantity:"
+msgid "Quantity"
+msgstr "Cantidad"
+
+msgctxt "field:sale.add_lines.select_product,selected_sales:"
+msgid "Selected Sales"
+msgstr "Ventas seleccionadas"
+
+msgctxt "field:sale.add_lines.select_product,square_meter:"
+msgid "Square meter"
+msgstr "Metro cuadrado"
+
+msgctxt "field:sale.add_lines.select_product,total_amount:"
+msgid "Total"
+msgstr "Total"
+
+msgctxt "field:sale.add_lines.select_product,unit_digits:"
+msgid "Unit Digits"
+msgstr "Dígitos de la unidad"
+
+msgctxt "field:sale.add_lines.select_product,unit_price:"
+msgid "Unit price"
+msgstr "Precio unitario"
+
+msgctxt "help:sale.add_lines.select_product,ignored_sales:"
+msgid ""
+"The sales that won't be changed because they are not in a state that allows "
+"it."
+msgstr ""
+
+msgctxt "model:ir.action,name:wizard_add_lines"
+msgid "Add lines"
+msgstr "Agregar líneas"
+
+msgctxt "model:sale.add_lines.select_product,name:"
+msgid "Add Products to Sale: Select products"
+msgstr "Agregar productos a venta: seleccionar productos"
+
+msgctxt "view:sale.add_lines.select_product:"
+msgid "Choose the product that will be added in the selected sales"
+msgstr "Elija el producto que se agregará en las ventas seleccionadas"
+
+msgctxt "view:sale.add_lines.select_product:"
+msgid "Line"
+msgstr "Línea"
+
+msgctxt "view:sale.add_lines.select_product:"
+msgid "Line description"
+msgstr "Descripción línea"
+
+msgctxt "wizard_button:sale.add_lines,select_product,add_lines:"
+msgid "Add"
+msgstr "Agregar"
+
+msgctxt "wizard_button:sale.add_lines,select_product,end:"
+msgid "Cancel"
+msgstr "Cancelar"
