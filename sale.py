@@ -18,7 +18,7 @@ class AnalyticAccountEntry(metaclass=PoolMeta):
 
     @classmethod
     def _get_origin(cls):
-        origins = super(AnalyticAccountEntry, cls)._get_origin()
+        origins = super()._get_origin()
         return origins + ['sale.add_lines.select_product']
 
 
@@ -115,7 +115,7 @@ class AddLines(Wizard):
 
     @classmethod
     def __setup__(cls):
-        super(AddLines, cls).__setup__()
+        super().__setup__()
         cls._allowed_sale_states = {'draft'}
 
     def default_select_product(self, fields):
