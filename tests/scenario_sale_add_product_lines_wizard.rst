@@ -41,7 +41,6 @@ Create sale user::
     >>> sale_user = User()
     >>> sale_user.name = 'Sale'
     >>> sale_user.login = 'sale'
-    >>> sale_user.main_company = company
     >>> sale_group, = Group.find([('name', '=', 'Sales')])
     >>> sale_user.groups.append(sale_group)
     >>> sale_user.save()
@@ -68,8 +67,6 @@ Create journals::
 
     >>> Journal = Model.get('account.journal')
     >>> cash_journal, = Journal.find([('type', '=', 'cash')])
-    >>> cash_journal.credit_account = account_cash
-    >>> cash_journal.debit_account = account_cash
     >>> cash_journal.save()
 
 Create parties::
@@ -98,7 +95,6 @@ Create product::
     >>> template.name = 'product'
     >>> template.default_uom = unit
     >>> template.type = 'goods'
-    >>> template.purchasable = True
     >>> template.salable = True
     >>> template.list_price = Decimal('10')
     >>> template.cost_price = Decimal('5')
