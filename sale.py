@@ -33,11 +33,9 @@ class AddLinesSelectProduct(ModelView, AnalyticMixin):
         "that allows it.")
     product = fields.Many2One('product.product', 'Product',
         domain=[('salable', '=', True)],
-        states={'readonly': Eval('selected_sales', 0) == 0},
-        depends=['selected_sales'])
-    total_amount = fields.Numeric('Total', digits=(16,
-            Eval('currency_digits', 2)), depends=['currency_digits'],
-        required=True)
+        states={'readonly': Eval('selected_sales', 0) == 0})
+    total_amount = fields.Numeric('Total',
+        digits=(16, Eval('currency_digits', 2)), required=True)
     dues = fields.Integer('Dues', required=True)
     square_meter = fields.Numeric('Square meter', price_digits, required=True)
     first_invoice_date = fields.Date('First invoice date', required=True)
@@ -45,8 +43,7 @@ class AddLinesSelectProduct(ModelView, AnalyticMixin):
     unit_price = fields.Numeric('Unit price', digits=price_digits,
         readonly=True)
     quantity = fields.Float('Quantity',
-        digits=(16, Eval('unit_digits', 2)),
-        depends=['unit_digits'], readonly=True)
+        digits=(16, Eval('unit_digits', 2)), readonly=True)
     unit_digits = fields.Function(fields.Integer('Unit Digits'),
         'on_change_with_unit_digits')
     currency_digits = fields.Integer('Currency Digits')
@@ -119,7 +116,7 @@ class AddLines(Wizard):
         selected_sales = Sale.search([
                 ('id', 'in', active_ids),
                 ('state', 'in', self._allowed_sale_states),
-                ('lines', 'in', None),
+                #('lines', 'in', None),
                 ], count=True)
         return {
             'selected_sales': selected_sales,
@@ -174,9 +171,8 @@ class AddLines(Wizard):
                 description = line.product.rec_name
                 if self.select_product.line_description:
                     description = self.select_product.line_description
-                line.description = '%s. Period: %s. Cuota %s de %s' % (
+                line.description = '%s. Cuota %s de %s' % (
                     description,
-                    line.manual_delivery_date.strftime('%Y-%m'),
                     str(due),
                     str(dues),
                     )
